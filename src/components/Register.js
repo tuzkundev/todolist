@@ -7,59 +7,48 @@ import "./register.css";
 const Register = () => {
   const navigate = useNavigate();
 
-  const [user, setUser] = useState({
-    name: "",
-    email: "",
-    password: "",
-    age: "",
-  });
+  // const [user, setUser] = useState({
+  //   name: "",
+  //   email: "",
+  //   password: "",
+  //   age: "",
+  // });
 
-  const [data, setData] = useState([]);
-
-  const getData = (e) => {
-    const { value, name } = e.target;
-
-    setUser(() => {
-      return {
-        ...user,
-        [name]: value,
-      };
-    });
-  };
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [age, setAge] = useState("");
 
   const addData = async (e) => {
     e.preventDefault();
 
-    const { name, email, password, age } = user;
+    //const { name, email, password, age } = user;
 
-    let results = await axios
+    axios
       .post("https://api-nodejs-todolist.herokuapp.com/user/register", {
         name: name,
         email: email,
         password: password,
         age: age,
       })
-      .then(function (res) {
+      .then((res) => {
         console.log(res);
-      })
-      .catch(function (error) {
-        console.log(error);
+        console.log(res.data);
+        navigate("/login");
+        localStorage.setItem("token", res.data.token);
       });
-
-    navigate("/login");
-    localStorage.setItem("userInfo", JSON.stringify([...data, results]));
   };
 
   return (
     <div className="container">
       <h1>Register</h1>
-      <form onSubmit={addData}>
+      <form onSubmit={(e) => addData(e)}>
         <div className="form-control">
           <input
             type="text"
             id="name"
             placeholder="Username"
-            onChange={getData}
+            onChange={(e) => setName(e.target.value)}
           />
           <span></span>
         </div>
@@ -68,7 +57,7 @@ const Register = () => {
             type="email"
             id="email"
             placeholder="Email"
-            onChange={getData}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <span></span>
         </div>
@@ -77,18 +66,23 @@ const Register = () => {
             type="password"
             id="password"
             placeholder="Password"
-            onChange={getData}
+            onChange={(e) => setPassword(e.target.value)}
           />
           <span></span>
         </div>
         <div className="form-control">
-          <input type="number" id="age" placeholder="Age" onChange={getData} />
+          <input
+            type="number"
+            id="age"
+            placeholder="Age"
+            onChange={(e) => setAge(e.target.value)}
+          />
           <span></span>
         </div>
 
         <input type="submit" value="Register" />
         <div className="signup">
-          Not a new member?{" "}
+          Not a new member?
           <button>
             <NavLink to="/login">Sign up</NavLink>
           </button>

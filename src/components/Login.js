@@ -1,53 +1,56 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import { login } from "../api/apiConfig";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import "./Login.css";
 
 const Login = () => {
   const navigate = useNavigate();
 
-  const [user, setUser] = useState({
-    email: "",
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    password: "",
-  });
-  const [data, setData] = useState([]);
+  useEffect(() => {
+    // const getTokenRegister = localStorage.getItem("token");
+    // if (getTokenRegister) {
+    //   navigate("/todo");
+    // } else {
+    //   navigate("/");
+    // }
 
-  const getData = (e) => {
-    const { value, name } = e.target;
+    function loginStore() {
+      const getTokenRegister = localStorage.getItem("token");
+      if (getTokenRegister) {
+        navigate("/todo");
+      } else {
+        navigate("/");
+      }
+    }
 
-    setUser(() => {
-      return {
-        ...user,
-        [name]: value,
-      };
-    });
-  };
+    window.addEventListener("storage", loginStore);
+
+    return () => {
+      window.removeEventListener("storage", loginStore);
+    };
+  }, []);
 
   const addData = (e) => {
     e.preventDefault();
 
-    const getUserArr = localStorage.getItem("userInfo");
-    const { email, password } = user;
-
-    //https://api-nodejs-todolist.herokuapp.com/user/login
-
-    if (getUserArr && getUserArr.length) {
-      const userData = JSON.parse(getUserArr);
-      const userLogin = userData.filter((el, k) => {
-        return el.email === email && el.password === password;
-      });
-
-      if (userLogin.length === 0) {
-        alert("Loi chua nhap");
-      } else {
-        console.log("Login ok");
-
-        localStorage.setItem("user_login", JSON.stringify(userLogin));
-
-        navigate("/todo");
-      }
+    if (email === "" || password === "") {
+      alert("Chua nhap email hoac password");
+    } else {
+      axios
+        .post("https://api-nodejs-todolist.herokuapp.com/user/login", {
+          email: email,
+          password: password,
+        })
+        .then((res) => {
+          console.log(res.data);
+          localStorage.setItem("token", res.data.token);
+        })
+        .then(() => setTimeout(() => navigate("/todo"), 3000));
     }
   };
 
@@ -60,7 +63,7 @@ const Login = () => {
             type="text"
             id="name"
             placeholder="Username"
-            onChange={getData}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <span></span>
         </div>
@@ -69,7 +72,7 @@ const Login = () => {
             type="password"
             id="password"
             placeholder="Password"
-            onChange={getData}
+            onChange={(e) => setPassword(e.target.value)}
           />
           <span></span>
         </div>
